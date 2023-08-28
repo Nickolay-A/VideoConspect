@@ -1,0 +1,11 @@
+test.ipynb
+test.py
+
+*.mp3
+*.mp4
+__pycache__/
+test/
+
+*/.vscode/*
+*/.envs
+*.env

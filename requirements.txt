@@ -1,0 +1,8 @@
+boto3                     == 1.28.3
+yt-dlp                    == 2023.7.6
+moviepy                   == 1.0.3
+google-api-python-client  == 2.93.0
+pytelegrambotapi          == 4.11.0
+claude-api                == 1.0.17
+openai-whisper            == 20230314
+python-dotenv             == 1.0.0
