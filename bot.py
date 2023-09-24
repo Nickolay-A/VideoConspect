@@ -72,8 +72,9 @@ if not os.path.exists(tmp_dir):
 # словарь для хранения списка очереди
 user_queue_positions = {}
 
-# Создаем executor (очередь) с максимальным количеством потоков, равным 3 (временно 1)
-executor = ThreadPoolExecutor(max_workers=1)
+# Создаем executor (очередь) с максимальным количеством потоков, равным 3 (очередь на claude: 1)
+executor = ThreadPoolExecutor(max_workers=3)
+executor_for_claude = ThreadPoolExecutor(max_workers=1)
 
 def get_state(user_id):
     """
@@ -602,8 +603,12 @@ def work_with_requests(message, message_id, method, obj, lang):
         # get_text(audio_path)
 
     # получение конспекта
+    # if os.path.exists(row_text_path):
+    #     request_with_attachment(chat_id, row_text_path, cur_user_lang)
     if os.path.exists(row_text_path):
-        request_with_attachment(chat_id, row_text_path, cur_user_lang)
+        request_res = executor_for_claude.submit(request_with_attachment, chat_id, row_text_path, cur_user_lang)
+        print(f"Пользователь: {message.from_user.id} отправил сообщение с приложением")
+        result_res_claude = request_res.result()
 
     # последовательная отправка файлов
     # сырой текст
@@ -662,9 +667,13 @@ def send_message_to_bot(message):
     cur_user_lang = user_lang.setdefault(message.chat.id, 'ru')
 
     # получаем ответ от LLM
-    reply = request_without_attachment(message.chat.id, message.text)
-    if reply is None:
-        reply = lang_obj[cur_user_lang]['message_work_fail']
+    request_res_2 = executor_for_claude.submit(request_without_attachment, message.chat.id, message.text)
+    print(f"Пользователь: {message.from_user.id} отправил сообщение")
+    reply_claude = request_res_2.result()
+    # reply = request_without_attachment(message.chat.id, message.text)
+    # if reply is None:
+    if reply_claude is None:
+        reply_claude = lang_obj[cur_user_lang]['message_work_fail']
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttons = []
@@ -674,7 +683,7 @@ def send_message_to_bot(message):
     buttons.append(types.KeyboardButton(lang_obj[cur_user_lang]['button_about']))
     markup.add(*buttons)
     bot.send_message(message.from_user.id,
-                     reply,
+                     reply_claude,
                      reply_markup=markup)
 
 

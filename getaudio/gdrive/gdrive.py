@@ -77,7 +77,7 @@ def get_from_gdrive(url: str,
     file_handle.close()
 
     # вызов функции для извлечения звука
-    get_audio_from_file(path=output_file, name=name)
+    get_audio_from_file(path=output_file, temp_dir=temp_dir, name=name)
 
     return None
 
